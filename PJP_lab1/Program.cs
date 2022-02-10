@@ -71,13 +71,12 @@ namespace PJP_lab1
             string second = string.Empty;
             string oper = string.Empty;
             int iter = 0;
-            bool reachedEnd = false;
             expr = expr.Replace(" ", string.Empty);
 
             while (true)
             {
                 //read two numbers + operator
-                while (/*iter != expr.Length*/true)
+                while (iter != expr.Length)
                 {
                     //first number
                     if (((expr[iter] >= '0') && (expr[iter] <= '9')) && (first == string.Empty))
@@ -127,40 +126,47 @@ namespace PJP_lab1
                             return;
                         }
                     }
-
-                    //solve
                     else
                     {
-                        float res = 0;
-                        if (oper == "+")
-                            res = sum(first, second);
-                        else if (oper == "-")
-                            res = dif(first, second);
-                        else if (oper == "*")
-                            res = mul(first, second);
-                        else if (oper == "/")
-                            res = div(first, second);
-
-                        if (res == -1)
-                        {
-                            Console.WriteLine("ERROR - Bad expression");
-                            return;
-                        }
-
-                        Console.WriteLine("{0} {1} {2} {3}", first, oper, second, res);
-                        string resStr = first + oper + second;
-
-                        //nahrazeno vyrazu vypoctem
-                        expr = expr.Replace(resStr, res.ToString());
-
-                        first = string.Empty;
-                        second = string.Empty;
-                        oper = string.Empty;
-                        iter = 0;
-
+                        iter++;
                     }
-
                 }
+
+                //solve
+                float res = 0;
+                if (oper == "+")
+                    res = sum(first, second);
+                else if (oper == "-")
+                    res = dif(first, second);
+                else if (oper == "*")
+                    res = mul(first, second);
+                else if (oper == "/")
+                    res = div(first, second);
+
+                if (res == -1)
+                {
+                    Console.WriteLine("ERROR - Bad expression");
+                    return;
+                }
+
+                Console.WriteLine("{0} {1} {2} = {3}", first, oper, second, res);
+                string resStr = first + oper + second;
+
+                //nahrazeni vyrazu vypoctem
+                expr = expr.Replace(resStr, res.ToString());
+                Console.WriteLine("New expr: {0}", expr);
+
+                if(second == string.Empty)
+                {
+                    Console.WriteLine("Result: {0}", first);
+                    return;
+                }
+
+                first = string.Empty;
+                second = string.Empty;
+                oper = string.Empty;
+                iter = 0;
+
             }
         }
 
