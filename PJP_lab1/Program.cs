@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define COMPUTE_DEBUG
+using System;
 
 namespace PJP_lab1
 {
@@ -84,9 +85,13 @@ namespace PJP_lab1
             Console.WriteLine("Expr: {0}", expr);
             string first = string.Empty;
             string second = string.Empty;
+            string nextNum = string.Empty;
             string oper = string.Empty;
             int iter = 0;
-            int parCount = 0;
+            //int lparCount = 0;
+            //int pparCount = 0;
+            int lparCount = expr.Count(par => par == '(');
+            int pparCount = expr.Count(par => par == ')');
             expr = expr.Replace(" ", string.Empty);
 
             while (true)
@@ -118,6 +123,19 @@ namespace PJP_lab1
                         }
                     }
 
+                    //dalsi cislo
+                    else if (((expr[iter] >= '0') && (expr[iter] <= '9')) && (nextNum == string.Empty))
+                    {
+                        while ((expr[iter] >= '0') && (expr[iter] <= '9'))
+                        {
+                            nextNum += expr[iter++];
+                            if (iter >= expr.Length)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
                     //operator
                     else if (((expr[iter] == '+') || (expr[iter] == '-') || (expr[iter] == '*') || (expr[iter] == '/')) && (oper == string.Empty))
                     {
@@ -128,24 +146,40 @@ namespace PJP_lab1
                             return "ERROR";
                         }
 
-                        if(expr[iter] == '*')
+                        if ((expr[iter] == '+') || (expr[iter] == '-') || (expr[iter] == '/'))
+                        {
+                            Console.WriteLine("ERROR - Unsupported operator");
+                            return "ERROR";
+                        }
+
+                        //hot fix pro mocninu
+                        if (expr[iter] == '*')
                         {
                             oper = "**";
+                            iter++;
                         }
                     }
 
                     //dalsi znak
                     else if (((oper == "+") || (oper == "-")) && ((expr[iter] == '*') || (expr[iter] == '/')))
                     {
-                        first = second;
+                        if (nextNum != string.Empty)
+                        {
+                            first = nextNum;
+                            nextNum = string.Empty;
+                        }
+                        else
+                            first = second;
+     
                         second = string.Empty;
                         oper = expr[iter].ToString();
                         iter++;
 
-                        //hot fix pro mocninu
+                        //kontrola nepovolenych operatoru + hot fix pro mocninu
                         if(expr[iter] == '*')
                         {
                             oper = "**";
+                            iter++;
                         }
 
                         if (iter >= expr.Length)
@@ -162,21 +196,37 @@ namespace PJP_lab1
                         second = string.Empty;
                         oper = string.Empty;
 
-                        parCount++;
                         iter++;
+                    }
+
+                    else if(expr[iter] == ')')
+                    {
+                        iter++;
+                        break;
                     }
 
                     else
                     {
                         iter++;
+                        //Console.WriteLine("ERROR - Something unexpected");
+                        //return "ERROR";
                     }
                 }
 
                 //kontrola konce
                 if (second == string.Empty)
                 {
-                    Console.WriteLine("Result: {0}\n", first);
+                    Console.WriteLine("Result: {0}", first);
                     return first;
+                }
+
+                //kontrola stejneho poctu zavorek
+                {
+                    if(lparCount != pparCount)
+                    {
+                        Console.WriteLine("ERROR - Bad parantheses count");
+                        return "ERROR";
+                    }
                 }
 
                 //reseni
@@ -199,21 +249,26 @@ namespace PJP_lab1
                     return "ERROR";
                 }
 
-                //Console.WriteLine("{0} {1} {2} = {3}", first, oper, second, res);
+#if COMPUTE_DEBUG
+                Console.WriteLine("{0} {1} {2} = {3}", first, oper, second, res);
+#endif
                 string resStr = first + oper + second;
 
                 //nahrazeni vyrazu vypoctem
                 expr = expr.Replace(resStr, res.ToString());
 
                 //odstraneni zavorky u vyreseneho expr
-                if ((parCount > 0) && expr.Contains("(" + res + ")"))
+                if ((lparCount > 0) && expr.Contains("(" + res + ")"))
                 {
                     expr = expr.Replace("(" + res.ToString() + ")", res.ToString());
-                    parCount--;
+                    lparCount--;
+                    pparCount--;
                 }
 
                 //kontrolni vyraz
-                //Console.WriteLine("New expr: {0}", expr);
+#if COMPUTE_DEBUG
+                Console.WriteLine("New expr: {0}", expr);
+#endif
 
 
                 first = string.Empty;
@@ -242,6 +297,7 @@ namespace PJP_lab1
                 for (int i = 1; i <= int.Parse(exprs[0].ToString()); i++)
                 {
                     results.Add(compute(exprs[i]));
+                    Console.WriteLine();
                 }
 
                 if(args.Length > 1)
