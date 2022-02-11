@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PJP_lab1": {
+      "commandName": "Project",
+      "commandLineArgs": "input.txt output.txt"
+    }
+  }
+}
